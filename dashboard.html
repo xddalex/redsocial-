@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for Inter font */
+        body {
+            font-family: "Inter", sans-serif;
+        }
+        .profile-pic-container, .pet-pic-container {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 4px solid #fff;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            margin: 0 auto 24px;
+            background-color: #f0f0f0; /* Placeholder background */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .profile-pic-container img, .pet-pic-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .photo-card {
+            background-color: #f9fafb;
+            border-radius: 0.75rem; /* rounded-xl */
+            padding: 1rem; /* p-4 */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* shadow-md */
+            margin-bottom: 1.5rem; /* mb-6 */
+        }
+        .photo-card img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 0.5rem; /* rounded-lg */
+            margin-bottom: 1rem; /* mb-4 */
+        }
+        .comment-item {
+            background-color: #e2e8f0; /* bg-gray-200 */
+            padding: 0.5rem 0.75rem; /* px-3 py-2 */
+            border-radius: 0.5rem; /* rounded-lg */
+            margin-bottom: 0.5rem; /* mb-2 */
+            font-size: 0.875rem; /* text-sm */
+        }
+        .comment-item strong {
+            color: #2563eb; /* text-blue-700 */
+        }
+        /* Styles for webcam elements */
+        #webcamVideo {
+            width: 100%;
+            max-width: 300px; /* Limit video size */
+            height: auto;
+            border-radius: 0.5rem;
+            margin: 1rem auto;
+            display: block;
+            background-color: black;
+        }
+        #webcamCanvas {
+            display: none; /* Hidden by default */
+        }
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-green-400 to-blue-500 min-h-screen flex items-center justify-center p-4">
+    <div class="bg-white p-8 rounded-xl shadow-2xl w-full max-w-md text-center transform transition-all duration-300 hover:scale-105">
+        <h2 class="text-4xl font-bold text-gray-800 mb-4">¡Bienvenido!</h2>
+        <!-- El nombre de usuario se mostrará aquí y se podrá editar -->
+        <p class="text-2xl font-semibold text-blue-600 mb-6 hidden" id="displayUsername"></p>
+
+        <!-- Sección de Perfil de Usuario -->
+        <div class="border-b pb-6 mb-6">
+            <h3 class="text-2xl font-bold text-gray-700 mb-4">Mi Perfil</h3>
+            <div class="profile-pic-container">
+                <img id="profileImage" src="https://placehold.co/120x120/E0E0E0/808080?text=Foto" alt="Foto de Perfil">
+            </div>
+
+            <div class="mb-4">
+                <label for="profilePicUpload" class="block text-sm font-medium text-gray-700 mb-2">Cambiar Foto de Perfil (Archivo)</label>
+                <input
+                    type="file"
+                    id="profilePicUpload"
+                    accept="image/*"
+                    class="block w-full text-sm text-gray-500
+                    file:mr-4 file:py-2 file:px-4
+                    file:rounded-full file:border-0
+                    file:text-sm file:font-semibold
+                    file:bg-blue-50 file:text-blue-700
+                    hover:file:bg-blue-100 cursor-pointer"
+                >
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Tomar Foto de Perfil (Cámara Web)</label>
+                <video id="webcamVideo" autoplay class="hidden"></video>
+                <canvas id="webcamCanvas" class="hidden"></canvas>
+                <button
+                    id="toggleWebcamBtn"
+                    class="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-base font-semibold text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-all duration-200 transform hover:-translate-y-0.5 mb-2"
+                >
+                    Activar Cámara
+                </button>
+                <button
+                    id="captureWebcamBtn"
+                    class="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-base font-semibold text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-200 transform hover:-translate-y-0.5 hidden"
+                >
+                    Capturar Foto
+                </button>
+            </div>
+
+
+            <div class="mb-6">
+                <label for="usernameInput" class="block text-sm font-medium text-gray-700 mb-2">Nombre de Usuario</label>
+                <input
+                    type="text"
+                    id="usernameInput"
+                    class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-all duration-200"
+                    placeholder="Introduce tu nuevo nombre de usuario"
+                >
+            </div>
+        </div>
+
+        <!-- Sección de Datos de Mascota -->
+        <div class="border-b pb-6 mb-6">
+            <h3 class="text-2xl font-bold text-gray-700 mb-4">Mi Mascota</h3>
+            <div class="mb-6">
+                <label for="petNameInput" class="block text-sm font-medium text-gray-700 mb-2">Nombre de la Mascota</label>
+                <input
+                    type="text"
+                    id="petNameInput"
+                    class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-all duration-200"
+                    placeholder="Introduce el nombre de tu mascota"
+                >
+            </div>
+
+            <div class="mb-4">
+                <label for="petPhotosUpload" class="block text-sm font-medium text-gray-700 mb-2">Subir Fotos de Mascota</label>
+                <input
+                    type="file"
+                    id="petPhotosUpload"
+                    accept="image/*"
+                    multiple
+                    class="block w-full text-sm text-gray-500
+                    file:mr-4 file:py-2 file:px-4
+                    file:rounded-full file:border-0
+                    file:text-sm file:font-semibold
+                    file:bg-green-50 file:text-green-700
+                    hover:file:bg-green-100 cursor-pointer"
+                >
+            </div>
+        </div>
+
+        <!-- Galería de Fotos de Mascota -->
+        <div class="border-b pb-6 mb-6">
+            <h3 class="text-2xl font-bold text-gray-700 mb-4">Galería de Fotos de Mascota</h3>
+            <div id="petPhotosGallery" class="space-y-6">
+                <!-- Las fotos y comentarios de la mascota se cargarán aquí -->
+                <p id="noPhotosMessage" class="text-gray-500">No hay fotos de mascota subidas aún.</p>
+            </div>
+        </div>
+
+        <button
+            id="saveProfileBtn"
+            class="w-full flex justify-center py-3 px-4 mb-4 border border-transparent rounded-lg shadow-sm text-lg font-semibold text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 transform hover:-translate-y-0.5"
+        >
+            Guardar Perfil y Mascota
+        </button>
+
+        <button
+            onclick="clearAllData()"
+            class="w-full flex justify-center py-3 px-4 mb-4 border border-transparent rounded-lg shadow-sm text-lg font-semibold text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transition-all duration-200 transform hover:-translate-y-0.5"
+        >
+            Borrar Todos los Datos (localStorage)
+        </button>
+
+        <button
+            onclick="logout()"
+            class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-lg font-semibold text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all duration-200 transform hover:-translate-y-0.5"
+        >
+            Cerrar Sesión
+        </button>
+    </div>
+
+    <script>
+        const displayUsername = document.getElementById('displayUsername');
+        const usernameInput = document.getElementById('usernameInput');
+        const profileImage = document.getElementById('profileImage');
+        const profilePicUpload = document.getElementById('profilePicUpload');
+
+        // Webcam elements
+        const webcamVideo = document.getElementById('webcamVideo');
+        const webcamCanvas = document.getElementById('webcamCanvas');
+        const toggleWebcamBtn = document.getElementById('toggleWebcamBtn');
+        const captureWebcamBtn = document.getElementById('captureWebcamBtn');
+        let currentStream; // To store the webcam stream
+
+        const petNameInput = document.getElementById('petNameInput');
+        const petPhotosUpload = document.getElementById('petPhotosUpload');
+        const petPhotosGallery = document.getElementById('petPhotosGallery');
+        const noPhotosMessage = document.getElementById('noPhotosMessage');
+
+        const saveProfileBtn = document.getElementById('saveProfileBtn');
+
+        let petPhotos = [];
+
+        // Función para generar un ID único para las fotos
+        function generateUniqueId() {
+            return '_' + Math.random().toString(36).substr(2, 9);
+        }
+
+        // Función para cargar todos los datos (usuario, perfil y mascota)
+        function loadProfile() {
+            const username = localStorage.getItem('loggedInUsername');
+            const savedProfilePic = localStorage.getItem('profilePic');
+            const savedPetName = localStorage.getItem('petName');
+            const savedPetPhotos = localStorage.getItem('petPhotos');
+
+            if (username) {
+                displayUsername.textContent = username;
+                usernameInput.value = username;
+                displayUsername.classList.remove('hidden');
+            } else {
+                displayUsername.textContent = 'Invitado';
+                usernameInput.value = '';
+                displayUsername.classList.remove('hidden');
+            }
+
+            if (savedProfilePic) {
+                profileImage.src = savedProfilePic;
+            }
+
+            if (savedPetName) {
+                petNameInput.value = savedPetName;
+            }
+
+            if (savedPetPhotos) {
+                try {
+                    petPhotos = JSON.parse(savedPetPhotos);
+                    renderPetPhotos();
+                } catch (e) {
+                    console.error("Error al parsear las fotos de mascota de localStorage:", e);
+                    petPhotos = [];
+                }
+            } else {
+                petPhotos = [];
+            }
+        }
+
+        // Función para renderizar las fotos de la mascota en la galería
+        function renderPetPhotos() {
+            petPhotosGallery.innerHTML = '';
+            if (petPhotos.length === 0) {
+                noPhotosMessage.classList.remove('hidden');
+                petPhotosGallery.appendChild(noPhotosMessage);
+            } else {
+                noPhotosMessage.classList.add('hidden');
+                petPhotos.forEach(photo => {
+                    const photoCard = document.createElement('div');
+                    photoCard.className = 'photo-card';
+                    photoCard.innerHTML = `
+                        <img src="${photo.dataURL}" alt="Foto de Mascota">
+                        <div class="comments-section text-left">
+                            <h4 class="font-bold text-gray-700 mb-2">Comentarios:</h4>
+                            <div id="comments-${photo.id}" class="mb-4">
+                                <!-- Los comentarios se cargarán aquí -->
+                            </div>
+                            <textarea id="commentInput-${photo.id}" rows="2" class="w-full p-2 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500 mb-2" placeholder="Añade un comentario..."></textarea>
+                            <button data-photo-id="${photo.id}" class="add-comment-btn w-full py-2 px-4 rounded-lg bg-blue-500 text-white font-semibold hover:bg-blue-600 transition-colors duration-200">Añadir Comentario</button>
+                        </div>
+                    `;
+                    petPhotosGallery.appendChild(photoCard);
+                    renderComments(photo.id, photo.comments);
+                });
+                addCommentButtonListeners();
+            }
+        }
+
+        // Función para renderizar los comentarios de una foto específica
+        function renderComments(photoId, comments) {
+            const commentsContainer = document.getElementById(`comments-${photoId}`);
+            commentsContainer.innerHTML = '';
+            if (comments && comments.length > 0) {
+                comments.forEach(comment => {
+                    const commentItem = document.createElement('div');
+                    commentItem.className = 'comment-item';
+                    commentItem.innerHTML = `<strong>${comment.username}:</strong> ${comment.text}`;
+                    commentsContainer.appendChild(commentItem);
+                });
+            } else {
+                commentsContainer.innerHTML = '<p class="text-gray-500 text-sm">No hay comentarios aún.</p>';
+            }
+        }
+
+        // Añadir event listeners a los botones de añadir comentario
+        function addCommentButtonListeners() {
+            document.querySelectorAll('.add-comment-btn').forEach(button => {
+                button.onclick = function() {
+                    const photoId = this.dataset.photoId;
+                    const commentInput = document.getElementById(`commentInput-${photoId}`);
+                    const commentText = commentInput.value.trim();
+                    const currentUser = localStorage.getItem('loggedInUsername') || 'Anónimo';
+
+                    if (commentText) {
+                        const photoIndex = petPhotos.findIndex(p => p.id === photoId);
+                        if (photoIndex !== -1) {
+                            if (!petPhotos[photoIndex].comments) {
+                                petPhotos[photoIndex].comments = [];
+                            }
+                            petPhotos[photoIndex].comments.push({ username: currentUser, text: commentText });
+                            localStorage.setItem('petPhotos', JSON.stringify(petPhotos));
+                            renderComments(photoId, petPhotos[photoIndex].comments);
+                            commentInput.value = '';
+                        }
+                    } else {
+                        alert('Por favor, escribe un comentario.');
+                    }
+                };
+            });
+        }
+
+        // Manejar la selección de la imagen de perfil (desde archivo)
+        profilePicUpload.addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    profileImage.src = e.target.result;
+                    // Detener la cámara si está activa
+                    stopWebcam();
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // --- Funcionalidad de la cámara web ---
+        toggleWebcamBtn.addEventListener('click', async () => {
+            if (webcamVideo.classList.contains('hidden')) {
+                // Activar cámara
+                try {
+                    currentStream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    webcamVideo.srcObject = currentStream;
+                    webcamVideo.classList.remove('hidden');
+                    captureWebcamBtn.classList.remove('hidden');
+                    toggleWebcamBtn.textContent = 'Desactivar Cámara';
+                    profilePicUpload.classList.add('hidden'); // Ocultar input de archivo
+                } /* Error handling */
+                catch (err) {
+                    console.error("Error al acceder a la cámara:", err);
+                    alert('No se pudo acceder a la cámara. Asegúrate de dar permisos.');
+                }
+            } else {
+                // Desactivar cámara
+                stopWebcam();
+            }
+        });
+
+        captureWebcamBtn.addEventListener('click', () => {
+            if (currentStream) {
+                webcamCanvas.width = webcamVideo.videoWidth;
+                webcamCanvas.height = webcamVideo.videoHeight;
+                const context = webcamCanvas.getContext('2d');
+                context.drawImage(webcamVideo, 0, 0, webcamCanvas.width, webcamCanvas.height);
+                const imageDataURL = webcamCanvas.toDataURL('image/png');
+                profileImage.src = imageDataURL; // Establece la imagen de perfil
+                stopWebcam(); // Detener la cámara después de capturar
+            }
+        });
+
+        function stopWebcam() {
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop());
+                webcamVideo.srcObject = null;
+                webcamVideo.classList.add('hidden');
+                captureWebcamBtn.classList.add('hidden');
+                toggleWebcamBtn.textContent = 'Activar Cámara';
+                profilePicUpload.classList.remove('hidden'); // Mostrar input de archivo
+            }
+        }
+        // --- Fin de funcionalidad de la cámara web ---
+
+
+        // Manejar la selección de múltiples imágenes de mascota
+        petPhotosUpload.addEventListener('change', function(event) {
+            const files = event.target.files;
+            if (files.length > 0) {
+                Array.from(files).forEach(file => {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        petPhotos.push({
+                            id: generateUniqueId(),
+                            dataURL: e.target.result,
+                            comments: []
+                        });
+                        renderPetPhotos();
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
+        });
+
+        // Manejar el guardado de todos los datos del perfil y mascota
+        saveProfileBtn.addEventListener('click', function() {
+            const newUsername = usernameInput.value.trim();
+            const newPetName = petNameInput.value.trim();
+
+            if (newUsername) {
+                localStorage.setItem('loggedInUsername', newUsername);
+                displayUsername.textContent = newUsername;
+            }
+
+            if (newPetName) {
+                localStorage.setItem('petName', newPetName);
+            }
+
+            localStorage.setItem('profilePic', profileImage.src);
+            localStorage.setItem('petPhotos', JSON.stringify(petPhotos));
+
+            alert('¡Perfil y datos de mascota guardados exitosamente!');
+        });
+
+        // Nueva función para borrar todos los datos del localStorage
+        function clearAllData() {
+            if (confirm('¿Estás seguro de que quieres borrar TODOS los datos de tu perfil y mascota? Esta acción no se puede deshacer.')) {
+                localStorage.clear(); // Borra todo el localStorage
+                alert('Todos los datos han sido borrados. La página se recargará.');
+                window.location.reload(); // Recarga la página para reflejar los cambios
+            }
+        }
+
+        // Función para cerrar sesión
+        function logout() {
+            // Se ha cambiado a una ruta relativa simple para mayor compatibilidad.
+            // Asegúrate de que 'logout.html' esté en el mismo directorio que 'dashboard.html'
+            window.location.replace('logout.html');
+        }
+
+        // Cargar el perfil al cargar la página
+        window.onload = loadProfile;
+    </script>
+</body>
+</html>
